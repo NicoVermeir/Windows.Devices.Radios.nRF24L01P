@@ -8,7 +8,6 @@ using Windows.Devices.Radios.nRF24L01P;
 using Windows.Devices.Radios.nRF24L01P.Enums;
 using Windows.Devices.Radios.nRF24L01P.Interfaces;
 using Windows.Devices.Radios.nRF24L01P.Registers;
-using Windows.Devices.Radios.nRF24L01P.Roles;
 using Windows.Devices.Spi;
 
 namespace nRF24L01P.UnitTests
@@ -69,11 +68,6 @@ namespace nRF24L01P.UnitTests
             rfChannelRegister.Save();
 
             _radio.OperatingMode = OperatingModes.ReceiveMode;
-        }
-
-        private void SendReceive_DataArrived(object sender, byte[] data)
-        {
-
         }
     }
 }

@@ -3,7 +3,7 @@
     "Microsoft.IoT.DeviceCore": "1.0.3",
     "Microsoft.IoT.Lightning": "1.0.2-alpha",
     "Microsoft.IoT.SDKFromArduino": "1.1.1",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0"
   },
   "frameworks": {
     "uap10.0": {}

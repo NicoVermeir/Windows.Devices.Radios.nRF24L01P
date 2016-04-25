@@ -1,6 +1,4 @@
-﻿using Common.Logging;
-using System;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using Windows.Devices.Radios.nRF24L01P.Enums;
 using Windows.Devices.Radios.nRF24L01P.Interfaces;
@@ -12,19 +10,8 @@ namespace Windows.Devices.Radios.nRF24L01P
     {
         private readonly bool _revertBytes;
         private readonly SpiDevice _spiDevice;
-        private ILog _logger;
         protected readonly object SyncRoot;
-        private ILoggerFactoryAdapter _loggerFactory;
-        public ILoggerFactoryAdapter LoggerFactory
-        {
-            get { return _loggerFactory; }
-            set
-            {
-                _loggerFactory = value;
-                _logger = LoggerFactory.GetLogger(GetType());
-            }
 
-        }
         public Action<byte[]> LoadStatusRegister { get; set; }
         public Func<OperatingModes> GetOperatingMode { get; set; }
         public bool CheckOperatingMode { get; set; }
@@ -65,16 +52,13 @@ namespace Windows.Devices.Radios.nRF24L01P
                 Array.Copy(value, 0, sendBuffer, 1, resultLength);
 
             // Send and Receive
-            _logger?.TraceFormat("ExecuteCommand: {0} Address: {1} Value: {2} BufferData: {3}", deviceCommand, address,
-                   value.Aggregate("", (current, part) => current + part.ToString("X").PadLeft(2, '0')),
-                   sendBuffer.Aggregate("", (current, part) => current + part.ToString("X").PadLeft(2, '0')));
+          
             lock (SyncRoot)
             {
                 _spiDevice.TransferFullDuplex(sendBuffer, receiveBuffer);
             }
             Task.Delay(1).Wait();
-            _logger?.TraceFormat("Status Register: {0}", receiveBuffer[0]);
-
+         
             // The STATUS register value is returned at first byte on each SPI call
             LoadStatusRegister?.Invoke(new[] { receiveBuffer[0] });
 
@@ -95,13 +79,11 @@ namespace Windows.Devices.Radios.nRF24L01P
             byte[] sendBuffer = new byte[1],
                     receiveBuffer = new byte[1];
             sendBuffer[0] = (byte)((byte)deviceCommand | address);
-            _logger?.TraceFormat("ExecuteCommand: {0} Address: {1} BufferData: {2}", deviceCommand, address,
-                   sendBuffer.Aggregate("", (current, part) => current + part.ToString("X").PadLeft(2, '0')));
+           
             lock (SyncRoot)
             {
                 _spiDevice.TransferFullDuplex(sendBuffer, receiveBuffer);
             }
-            _logger?.TraceFormat("Status Register: {0}", receiveBuffer[0]);
             return receiveBuffer[0];
         }
 
@@ -112,13 +94,10 @@ namespace Windows.Devices.Radios.nRF24L01P
             byte[] sendBuffer = new byte[1],
                     receiveBuffer = new byte[1];
             sendBuffer[0] = (byte)deviceCommand;
-            _logger?.TraceFormat("ExecuteCommand {0} BufferData: {1}", deviceCommand,
-                   sendBuffer.Aggregate("", (current, part) => current + part.ToString("X").PadLeft(2, '0')));
             lock (SyncRoot)
             {
                 _spiDevice.TransferFullDuplex(sendBuffer, receiveBuffer);
             }
-            _logger?.TraceFormat("Status Register: {0}", receiveBuffer[0]);
             return receiveBuffer[0];
         }
 

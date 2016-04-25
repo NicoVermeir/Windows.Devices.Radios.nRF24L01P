@@ -1,5 +1,4 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
@@ -7,7 +6,6 @@ using Windows.Devices.Gpio;
 using Windows.Devices.Radios.nRF24L01P;
 using Windows.Devices.Radios.nRF24L01P.Extensions;
 using Windows.Devices.Radios.nRF24L01P.Interfaces;
-using Windows.Devices.Radios.nRF24L01P.Logging;
 using Windows.Devices.Radios.nRF24L01P.Roles;
 using Windows.Devices.Spi;
 using Windows.System.Threading;
@@ -20,8 +18,6 @@ namespace nRF24L01P.TestHarness
         private SenderReceiverRole _sendReceiveRole;
         private readonly ManualResetEvent _manualResetEvent;
         private readonly object _syncRoot;
-        private readonly ILog _logger;
-        private readonly ILoggerFactoryAdapter _loggerFactory;
         private readonly TaskFactory _taskFactory;
 
         public byte[] SendAddress { get; set; }
@@ -85,10 +81,6 @@ namespace nRF24L01P.TestHarness
             _syncRoot = new object();
 
             _taskFactory = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.ExecuteSynchronously);
-
-            _loggerFactory = new DebugOutLoggerFactoryAdapter(LogLevel.All, true, true, true, "MM/dd/yyyy hh:mm:ss");
-            _logger = _loggerFactory.GetLogger(GetType());
-
         }
 
         public void Dispose()
@@ -114,7 +106,6 @@ namespace nRF24L01P.TestHarness
             _radio = new Radio(commandProcessor, powerPin, cePin, irqPin);
             _sendReceiveRole = new SenderReceiverRole();
             _sendReceiveRole.AttachRadio(_radio);
-            _sendReceiveRole.DataArrived += DataArrived; ;
             _sendReceiveRole.SendAddress = SendAddress;
             _sendReceiveRole.ReceiveAddress = ReceiveAddress;
             _sendReceiveRole.Start();
@@ -146,9 +137,6 @@ namespace nRF24L01P.TestHarness
                     if (count > 20)
                         break;
                 }
-                _logger.Debug("SendX10Packet " + (count <= 20 ? "succeeded!" : "failed!") +
-                    "Count: " + count + " { " + reverseBytes[0] + ", " + reverseBytes[1] + ", " + reverseBytes[2] + " }");
-
             }
 
             return count <= 20;
@@ -167,14 +155,8 @@ namespace nRF24L01P.TestHarness
                     if (count > 10)
                         break;
                 }
-                _logger.Debug("SendEnvironmentRequestPacket " + (count <= 10 ? "succeeded!" : "failed!"));
             }
             return count <= 10;
-        }
-
-        private void DataArrived(object sender, byte[] e)
-        {
-            _logger.DebugFormat("PacketType: {0} House: {1} Unit: {2} Command: {3}", (wrPacketTypes)e[0], (char)e[1], e[2], e[3]);
         }
 
         private void WaitForData()

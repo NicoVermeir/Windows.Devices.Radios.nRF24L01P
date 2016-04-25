@@ -1,6 +1,4 @@
-﻿using Common.Logging;
-using System;
-using System.Diagnostics;
+﻿using System;
 using Windows.Devices.Gpio;
 using Windows.Devices.Radios.nRF24L01P.Enums;
 using Windows.Devices.Radios.nRF24L01P.Interfaces;
@@ -13,15 +11,13 @@ namespace Windows.Devices.Radios.nRF24L01P
         private readonly IRegisterContainer _registerContainer;
         private readonly IConfiguration _configuration;
         private readonly ICommandProcessor _commandProcessor;
-        private readonly ILog _logger;
         private readonly GpioPin _cePin;
 
-        public TransmitPipe(IConfiguration configuration, ICommandProcessor commandProcessor, IRegisterContainer registerContainer, ILog logger, GpioPin cePin)
+        public TransmitPipe(IConfiguration configuration, ICommandProcessor commandProcessor, IRegisterContainer registerContainer, GpioPin cePin)
         {
             _configuration = configuration;
             _commandProcessor = commandProcessor;
             _registerContainer = registerContainer;
-            _logger = logger;
             _cePin = cePin;
         }
 
@@ -71,7 +67,6 @@ namespace Windows.Devices.Radios.nRF24L01P
 
         public bool Write(byte[] data, bool disableAck = false, int timeout = 1000)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
             StatusRegister statusRegister = _registerContainer.StatusRegister;
 
             while (statusRegister.TransmitFifoFull)
